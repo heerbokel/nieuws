@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Heer Bokel Courant - Home</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <h1>Heer Bokel Courant</h1>
+</header>
+
+<nav>
+  <a href="index.html">Home</a>
+  <a href="search.html">Zoek artikelen</a>
+</nav>
+
+<main>
+
+  <!-- 🟦 RECENTSTE ARTIKEL (bovenaan) -->
+  <section id="recentArticle" class="recent-article"></section>
+
+  <!-- 🟦 GEZEGDE VAN DE WEEK -->
+  <section id="gezegdeSection" class="gezegde-box">
+    <h2>Gezegde van de week</h2>
+    <p id="gezegdeText">Laden...</p>
+  </section>
+
+  <!-- 🟦 OVERIGE 10 ARTIKELEN -->
+  <section id="articlesContainer"></section>
+
+</main>
+
+<footer>
+  &copy; 2025 Heer Bokel Courant
+</footer>
+
+<!-- DATA BESTANDEN -->
+<script src="articles.js"></script>
+<script src="gezegdes.js"></script>
+
+<script>
+/* ==========================================
+   🟩 GEZEGDE VAN DE WEEK
+   ========================================== */
+
+function getCurrentGezegde() {
+  if (!gezegdes || gezegdes.length === 0)
+    return "Geen gezegde beschikbaar.";
+
+  let now = new Date();
+  const firstJan = new Date(now.getFullYear(), 0, 1);
+  const days = Math.floor((now - firstJan) / (24*60*60*1000));
+  const week = Math.ceil((now.getDay()+1 + days) / 7);
+
+  return gezegdes[week % gezegdes.length];
+}
+
+function displayGezegde() {
+  document.getElementById("gezegdeText").innerText = getCurrentGezegde();
+}
+
+/* ==========================================
+   🟩 ARTIKELEN
+   ========================================== */
+
+function getArticleImage(article) {
+  if (!article.image) return "";
+  return `<img src="${article.image}" class="article-img" alt="Artikel afbeelding">`;
+}
+
+function displayHomepage() {
+  if (!articles || articles.length === 0) return;
+
+  const sorted = [...articles].sort((a,b)=>new Date(b.date)-new Date(a.date));
+
+  const recent = sorted[0];
+  const others = sorted.slice(1, 11); // MAX 10 OVERIGE ARTIKELEN
+
+  /* --- RECENTSTE ARTIKEL --- */
+  const recentSnippet = recent.content.length > 50 
+    ? recent.content.substring(0,50)+"..." 
+    : recent.content;
+
+  document.getElementById("recentArticle").innerHTML = `
+    <h2>${recent.title}</h2>
+    ${getArticleImage(recent)}
+    <div class="meta">Auteur: ${recent.author} | Datum: ${recent.date}</div>
+    <p>${recentSnippet} <a href="article.html?id=${recent.id}">Lees meer</a></p>
+  `;
+
+  /* --- OVERIGE ARTIKELEN (10 MAX) --- */
+  const container = document.getElementById("articlesContainer");
+  container.innerHTML = "";
+
+  others.forEach(a => {
+    const snippet = a.content.length > 50 ? a.content.substring(0,50)+"..." : a.content;
+
+    container.innerHTML += `
+      <div class="article article-flex">
+        ${a.image ? `<img src="${a.image}" class="article-img-left">` : ""}
+        <div class="article-right">
+          <h3>${a.title}</h3>
+          <div class="meta">Auteur: ${a.author} | Datum: ${a.date}</div>
+          <p>${snippet} <a href="article.html?id=${a.id}">Lees meer</a></p>
+        </div>
+      </div>
+    `;
+  });
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+  displayGezegde();
+  displayHomepage();
+});
+</script>
+
+</body>
+</html>

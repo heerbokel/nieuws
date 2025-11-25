@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Artikel - Heer Bokel Courant</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <h1>Heer Bokel Courant</h1>
+</header>
+
+<nav>
+  <a href="index.html">Home</a>
+  <a href="search.html">Zoek artikelen</a>
+</nav>
+
+<main id="articleContainer"></main>
+
+<footer>
+  &copy; 2025 Heer Bokel Courant
+</footer>
+
+<script src="articles.js"></script>
+<script>
+const params = new URLSearchParams(window.location.search);
+const articleId = params.get("id");
+const article = articles.find(a => a.id == articleId);
+
+const container = document.getElementById("articleContainer");
+if(article){
+  let imgHTML = getArticleImage(article).replace('article-img','article-img-full');
+  const formattedContent = article.content.replace(/\n/g,"<br><br>");
+  container.innerHTML = `
+    <div class="article-full">
+      <h2>${article.title}</h2>
+      <div class="meta">Auteur: ${article.author} | Datum: ${article.date}</div>
+      ${imgHTML}
+      <p>${formattedContent}</p>
+    </div>
+  `;
+}else{
+  container.innerHTML = "<p>Artikel niet gevonden.</p>";
+}
+</script>
+
+</body>
+</html>

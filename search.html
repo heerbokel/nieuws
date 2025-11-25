@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zoek artikelen - Heer Bokel Courant</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <h1>Heer Bokel Courant</h1>
+</header>
+
+<nav>
+  <a href="index.html">Home</a>
+  <a href="search.html">Zoek artikelen</a>
+</nav>
+
+<main>
+  <section class="search-filters">
+    <input type="text" id="searchInput" placeholder="Zoek op titel of inhoud">
+    <select id="yearInput">
+      <option value="">Alle jaren</option>
+    </select>
+    <select id="authorInput">
+      <option value="">Alle auteurs</option>
+    </select>
+    <button id="searchBtn">Zoek</button>
+  </section>
+
+  <section id="searchResults"></section>
+</main>
+
+<footer>
+  &copy; 2025 Heer Bokel Courant
+</footer>
+
+<script src="articles.js"></script>
+<script>
+const searchInput = document.getElementById("searchInput");
+const yearInput = document.getElementById("yearInput");
+const authorInput = document.getElementById("authorInput");
+const searchBtn = document.getElementById("searchBtn");
+const resultsContainer = document.getElementById("searchResults");
+
+function populateDropdowns() {
+  const years = [...new Set(articles.map(a => a.date.substring(0,4)))].sort((a,b)=>b-a);
+  const authors = [...new Set(articles.map(a => a.author))].sort();
+
+  years.forEach(y => { let opt = document.createElement("option"); opt.value=y; opt.textContent=y; yearInput.appendChild(opt); });
+  authors.forEach(a => { let opt = document.createElement("option"); opt.value=a; opt.textContent=a; authorInput.appendChild(opt); });
+}
+
+function displayArticles(list){
+  resultsContainer.innerHTML = "";
+  if(list.length === 0){ resultsContainer.innerHTML="<p>Geen artikelen gevonden.</p>"; return; }
+  list.forEach(article => {
+    let imgHTML = getArticleImage(article).replace('article-img','article-left');
+    const snippet = article.content.length > 50 ? article.content.substring(0,50)+"..." : article.content;
+    resultsContainer.innerHTML += `
+      <div class="article article-flex">
+        ${imgHTML}
+        <div class="article-right">
+          <h3>${article.title}</h3>
+          <div class="meta">Auteur: ${article.author} | Datum: ${article.date}</div>
+          <p>${snippet} <a href="article.html?id=${article.id}">Lees meer</a></p>
+        </div>
+      </div>
+    `;
+  });
+}
+
+function searchArticles(){
+  const keyword = searchInput.value.toLowerCase();
+  const year = yearInput.value;
+  const author = authorInput.value;
+
+  let filtered = articles.filter(article => {
+    const matchesKeyword = article.title.toLowerCase().includes(keyword) || article.content.toLowerCase().includes(keyword);
+    const matchesYear = year ? article.date.startsWith(year) : true;
+    const matchesAuthor = author ? article.author === author : true;
+    return matchesKeyword && matchesYear && matchesAuthor;
+  });
+
+  filtered.sort((a,b)=>new Date(b.date)-new Date(a.date));
+  displayArticles(filtered);
+}
+
+window.addEventListener("DOMContentLoaded", ()=>{
+  populateDropdowns();
+  displayArticles(articles);
+});
+searchBtn.addEventListener("click", searchArticles);
+</script>
+
+</body>
+</html>
